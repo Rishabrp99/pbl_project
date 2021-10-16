@@ -1,0 +1,98 @@
+#include <LiquidCrystal.h>
+
+float duration, distance;
+const int trigPin = 13; //TRIG PIN
+const int echoPin = 12; // ECHO PIN
+const int LEDR = 5; //RED LED
+const int LEDG = 0; //Green Led
+
+LiquidCrystal lcd(11,10,9,8,7,6);
+int sensorpin = A0;
+int sensor_input;
+double temp;
+void setup()
+{
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600);
+  pinMode(LEDR,OUTPUT);
+  pinMode(LEDG,OUTPUT);
+  lcd.begin(16,2);
+  pinMode(A0,INPUT);
+  for(int i=2;i<=4;i++)
+  {
+    pinMode(i,OUTPUT);
+  }
+  //Serial.begin(9600);
+}
+
+void loop()
+{ 
+  sensor_input=analogRead(A0);
+  temp=(double)sensor_input/1024;
+  temp=temp*5;
+  temp=temp-0.5;
+  temp=temp*100;
+  if(temp<10)
+  {
+    digitalWrite(4,LOW);
+    digitalWrite(3,LOW);
+    digitalWrite(2,HIGH);
+    lcd.setCursor(0,1);
+    lcd.print("heater started");
+    
+  }
+  else if (temp>10 && temp<60)
+  {
+    digitalWrite(4,LOW);
+    digitalWrite(3,HIGH);
+    digitalWrite(2,LOW);
+    lcd.setCursor(0,1);
+    lcd.print("Optimal temperature");
+    
+  }
+  else if(temp>60)
+  {
+    digitalWrite(4,HIGH);
+    digitalWrite(3,LOW);
+    digitalWrite(2,LOW);
+    lcd.setCursor(0,1);
+    lcd.print(" Fan started");
+    
+  }
+ lcd.setCursor(0,0);
+ lcd.print("Temp=");
+ lcd.print(temp);
+ lcd.print("C");
+  // ultra
+ digitalWrite(trigPin, LOW);
+ delayMicroseconds(2);
+ digitalWrite(trigPin, HIGH);
+ delayMicroseconds(10);
+ digitalWrite(trigPin, LOW);
+
+ duration = pulseIn(echoPin, HIGH);
+ distance = (duration*.0343)/2;
+ Serial.print("Distance: ");
+ Serial.println(distance);
+ delay(500);
+
+if (distance > 200){ //Safe zona GREEN LED
+digitalWrite (LEDG, HIGH);
+delay(500);
+digitalWrite (LEDG, LOW);
+}
+
+else{
+digitalWrite(LEDG, LOW);
+}
+    
+if(distance < 100){ // Danger zone RED LED
+digitalWrite (LEDR, HIGH);
+}
+
+else{
+digitalWrite (LEDR, LOW);
+}
+  
+}
